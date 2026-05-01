@@ -1,99 +1,155 @@
-// Dependencies
-import { renderFile } from 'ejs';
-import { sha256 } from 'hash-wasm';
-import { stable } from './data/versions.mjs';
-import { writeFile, symlink } from 'fs/promises';
+import { access, readFile, symlink, unlink, writeFile, readlink } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
+
+import { Eta } from 'eta';
 import logSymbols from 'log-symbols';
-import MFH from 'make-fetch-happen';
-import mri from 'mri';
-import path from 'path';
 
-const argv = process.argv.slice(2);
-const { _: customVersions } = mri(argv);
+import { loadDataset } from './dataset.mjs';
 
-const fetch = MFH.defaults({
-  cacheManager: '.cache'
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
+const FORMULA_DIR = path.join(ROOT, 'Formula');
+const ALIAS_DIR = path.join(ROOT, 'Aliases');
+const TEMPLATE_DIR = path.join(__dirname, 'data');
+
+const eta = new Eta({
+  views: TEMPLATE_DIR,
+  useWith: true,
+  autoEscape: false,
+  cache: true,
 });
 
-const __dirname = path.resolve(path.dirname(''));
+const { values, positionals } = parseArgs({
+  options: {
+    only: { type: 'string', multiple: true },
+    add: { type: 'boolean', default: false },
+  },
+  allowPositionals: true,
+});
 
-// via https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
+const versionFilter = new Set([
+  ...((values.only ?? [])),
+  ...positionals,
+]);
+
+async function fileExists(filePath) {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
   }
 }
 
-async function getHash(blob) {
-  const data = new Uint8Array(blob);
-  const checksum = await sha256(data);
-
-  return checksum;
+function isPrerelease(entry) {
+  return entry.channel === 'prerelease';
 }
 
-async function template(outFile, data) {
-  data.classPrefix = (outFile.startsWith('Aliases/')) ? 'Nsis' : 'Makensis';
+function templateName(entry) {
+  return `nsis@${entry.major}`;
+}
 
-  renderFile(path.join(__dirname, `cmd/data/nsis@${data.versionMajor}.ejs`), data, async (err, contents) => {
-    if (err) {
-      console.error(logSymbols.error, err);
-      return;
-    }
-
-    await writeFile(outFile, contents);
-
-    console.log(logSymbols.success, `Saved: ${outFile}`);
+function renderFormula(entry) {
+  if (!entry.artifacts.sourceTarball) {
+    return null;
+  }
+  return eta.render(templateName(entry), {
+    version: entry.version,
+    versionNoDot: entry.version.replace(/\./g, ''),
+    sourceUrl: entry.artifacts.sourceTarball.url,
+    sourceSha256: entry.artifacts.sourceTarball.hashes.sha256,
+    zipUrl: entry.artifacts.zip.url,
+    zipSha256: entry.artifacts.zip.hashes.sha256,
   });
 }
 
-const createManifest = async (version) => {
-  let data = {};
-
-  data.version = version;
-  data.versionMajor = version[0];
-  data.versionNoDot = version.replace(/\./g, '');
-  data.directory = (/\d(a|b|rc)\d*$/.test(data.version) === true) ? `NSIS%20${data.versionMajor}%20Pre-release` : `NSIS%20${data.versionMajor}`;
-
-  const zipUrl = `https://downloads.sourceforge.net/project/nsis/${data.directory}/${data.version}/nsis-${data.version}.zip`;
-  const bzUrl = `https://downloads.sourceforge.net/project/nsis/${data.directory}/${data.version}/nsis-${data.version}-src.tar.bz2`;
-
+async function writeIfChanged(filePath, content) {
+  let existing = null;
   try {
-    const responseZip = await fetch(zipUrl);
-    data.hashZip = await getHash(await responseZip.arrayBuffer());
+    existing = await readFile(filePath, 'utf-8');
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+  if (existing === content) return 'unchanged';
+  await writeFile(filePath, content);
+  return existing === null ? 'created' : 'updated';
+}
 
-    const responseBzip = await fetch(bzUrl);
-    data.hashBzip2 = await getHash(await responseBzip.arrayBuffer());
+async function ensureSymlink(linkPath, target) {
+  let current = null;
+  try {
+    current = await readlink(linkPath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+  if (current === target) return 'unchanged';
+  if (current !== null) await unlink(linkPath);
+  await symlink(target, linkPath);
+  return current === null ? 'created' : 'updated';
+}
 
-    await template(`Formula/makensis@${data.version}.rb`, data);
-  } catch(error) {
-    if (error.statusMessage) {
-      if (error.statusMessage === 'Too Many Requests') {
-        return console.warn(logSymbols.warning, `${error.statusMessage}: nsis-${version}.zip`);
-      }
-      return console.error(logSymbols.error, `${error.statusMessage}: nsis-${version}.zip`);
-    } else if (error.code === 'ENOENT') {
-      return console.log('Skipping Test: Manifest Not Found');
-    }
-
-    console.error(logSymbols.error, error);
+async function emitFormula(entry, stats, addMissing) {
+  const content = renderFormula(entry);
+  if (content === null) {
+    console.warn(
+      logSymbols.warning,
+      `skip ${entry.version}: no source tarball available`,
+    );
+    stats.skipped += 1;
+    return;
   }
 
-  try {
-    await symlink(`../Formula/makensis@${data.version}.rb`, `Aliases/nsis@${data.version}.rb`);
-    console.log(logSymbols.success, `Saved: Aliases/nsis@${data.version}.rb`);
-  } catch (error) {
-    console.error(logSymbols.warning, `Skipping: Aliases/nsis@${data.version}.rb`);
+  const formulaFile = path.join(FORMULA_DIR, `makensis@${entry.version}.rb`);
+
+  if (!addMissing && !(await fileExists(formulaFile))) {
+    stats.skipped += 1;
+    return;
   }
-};
 
-const allVersions = Array.isArray(customVersions) && customVersions.length
-  ? customVersions
-  : [...stable.v2, ...stable.v3];
+  const formulaResult = await writeIfChanged(formulaFile, content);
+  stats[formulaResult] += 1;
+  if (formulaResult !== 'unchanged') {
+    console.log(
+      logSymbols.success,
+      `${formulaResult}: ${path.relative(ROOT, formulaFile)}`,
+    );
+  }
 
-console.info(logSymbols.info, `Creating ${allVersions.length} ${allVersions.length === 1 ? 'manifest' : 'manifests'}`);
+  const aliasFile = path.join(ALIAS_DIR, `nsis@${entry.version}.rb`);
+  const aliasTarget = path.join('..', 'Formula', `makensis@${entry.version}.rb`);
+  const aliasResult = await ensureSymlink(aliasFile, aliasTarget);
+  if (aliasResult !== 'unchanged') {
+    console.log(
+      logSymbols.success,
+      `symlink ${aliasResult}: ${path.relative(ROOT, aliasFile)}`,
+    );
+  }
+}
 
-// All versions
-asyncForEach(allVersions, async key => {
-  const value = stable[key];
-  await createManifest(key, value);
+async function main() {
+  const dataset = await loadDataset();
+  const stats = { created: 0, updated: 0, unchanged: 0, skipped: 0 };
+
+  const entries = Object.values(dataset.versions).filter(
+    (e) =>
+      !isPrerelease(e) &&
+      e.artifacts.sourceTarball !== null &&
+      (versionFilter.size === 0 || versionFilter.has(e.version)),
+  );
+
+  for (const entry of entries) {
+    await emitFormula(entry, stats, values.add === true);
+  }
+
+  console.log(
+    logSymbols.info,
+    `${stats.created} created, ${stats.updated} updated, ${stats.unchanged} unchanged, ${stats.skipped} skipped`,
+  );
+}
+
+main().catch((err) => {
+  console.error(logSymbols.error, err);
+  process.exit(1);
 });

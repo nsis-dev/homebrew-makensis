@@ -1,8 +1,8 @@
-class <%= classPrefix %>AT<%= versionNoDot %> < Formula
+class MakensisAT<%= versionNoDot %> < Formula
   desc "System to create Windows installers"
   homepage "https://nsis.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/nsis/<%= directory %>/<%= version %>/nsis-<%= version %>-src.tar.bz2"
-  sha256 "<%= hashBzip2 %>"
+  url "<%= sourceUrl %>"
+  sha256 "<%= sourceSha256 %>"
   license "Zlib"
 
   option "with-advanced-logging", "Enable advanced logging of all installer actions"
@@ -13,8 +13,8 @@ class <%= classPrefix %>AT<%= versionNoDot %> < Formula
   depends_on "scons" => :build
 
   resource "nsis" do
-    url "https://downloads.sourceforge.net/project/nsis/<%= directory %>/<%= version %>/nsis-<%= version %>.zip"
-    sha256 "<%= hashZip %>"
+    url "<%= zipUrl %>"
+    sha256 "<%= zipSha256 %>"
   end
 
   def install
