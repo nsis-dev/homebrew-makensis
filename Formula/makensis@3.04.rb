@@ -22,7 +22,9 @@ class MakensisAT304 < Formula
       "CC=#{ENV.cc}",
       "CXX=#{ENV.cxx}",
       "PREFIX_DOC=#{share}/nsis/Docs",
-      "SKIPUTILS=Makensisw,NSIS Menu,zip2exe",
+      "SKIPMISC=all",
+      "SKIPPLUGINS=all",
+      "SKIPUTILS=all",
       # Don't strip, see https://github.com/Homebrew/homebrew/issues/28718
       "STRIP=0",
       "VERSION=#{version}",
