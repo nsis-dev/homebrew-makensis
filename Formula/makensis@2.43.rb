@@ -23,9 +23,12 @@ class MakensisAT243 < Formula
 
   def install
     args = [
+      "PREFIX=#{prefix}",
+      "PREFIX_CONF=#{share}/nsis",
       "PREFIX_DOC=#{share}/nsis/Docs",
       "SKIPMISC=all",
       "SKIPPLUGINS=all",
+      "SKIPSTUBS=all",
       "SKIPUTILS=all",
       # Don't strip, see https://github.com/Homebrew/homebrew/issues/28718
       "STRIP=0",
