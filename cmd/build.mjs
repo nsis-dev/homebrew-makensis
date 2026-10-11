@@ -1,4 +1,4 @@
-import { access, readFile, symlink, unlink, writeFile, readlink } from 'node:fs/promises';
+import { access, readdir, readFile, symlink, unlink, writeFile, readlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -45,6 +45,23 @@ async function fileExists(filePath) {
 
 function isPrerelease(entry) {
   return entry.channel === 'prerelease';
+}
+
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] ?? -1) - (pb[i] ?? -1);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+async function latestFormulaVersion() {
+  const versions = (await readdir(FORMULA_DIR))
+    .map((f) => f.match(/^makensis@(.+)\.rb$/)?.[1])
+    .filter(Boolean);
+  return versions.sort(compareVersions).at(-1);
 }
 
 function templateName(entry) {
@@ -139,8 +156,12 @@ async function main() {
       (versionFilter.size === 0 || versionFilter.has(e.version)),
   );
 
+  // new releases are always added; older missing ones only with --add
+  const latest = await latestFormulaVersion();
+  
   for (const entry of entries) {
-    await emitFormula(entry, stats, values.add === true);
+    const addMissing = values.add === true || compareVersions(entry.version, latest) > 0;
+    await emitFormula(entry, stats, addMissing);
   }
 
   console.log(
