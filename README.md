@@ -2,6 +2,7 @@
 
 [![BSD 2-Clause License](https://flat.badgen.net/badge/license/BSD%202-Clause/blue)](https://opensource.org/licenses/BSD-2-Clause)
 [![Latest Release](https://flat.badgen.net/github/release/NSIS-Dev/homebrew-makensis)](https://github.com/NSIS-Dev/homebrew-makensis/releases)
+[![Build](https://flat.badgen.net/github/checks/NSIS-Dev/homebrew-makensis/master)](https://github.com/NSIS-Dev/homebrew-makensis/actions)
 
 Homebrew tap for Nullsoft Scriptable Install System (NSIS)
 

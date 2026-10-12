@@ -1,0 +1,70 @@
+name: Audit & Install Formulae
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+    - '.github/workflows/audit-formula.yml'
+    - 'Formula/**'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ${{ matrix.os }}
+
+    env:
+      HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 1
+
+    - name: Cache Homebrew downloads
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          ~/.cache/Homebrew
+        key: homebrew-${{ runner.os }}-${{ hashFiles('Formula/**') }}
+        restore-keys: |
+          homebrew-${{ runner.os }}-
+
+    - name: Install Homebrew
+      if: matrix.os == 'ubuntu-latest'
+      uses: Homebrew/actions/setup-homebrew@main
+
+    - name: Update Homebrew
+      if: matrix.os != 'ubuntu-latest'
+      run: brew update --auto-update
+
+    - name: Tap Repository
+      run: brew tap nsis-dev/makensis
+
+    - name: Style Formulae
+      run: brew style ./Formula
+
+    - name: Audit Formulae
+      run: |
+        for file in ./Formula/*.rb
+        do
+          echo "Auditing formula $file"
+          brew audit nsis-dev/makensis/$(basename ${file%.rb}) --online --formula
+        done
+
+    # Only the latest version: all formulae install the same bin/makensis
+    - name: Install & Test Latest Formula
+      run: |
+        name=$(ls Formula | sort -V | tail -n1)
+        name=${name%.rb}
+        brew install nsis-dev/makensis/$name --build-from-source --formula
+        brew test $name
+
+    - name: Cleanup
+      run: brew cleanup --prune=all

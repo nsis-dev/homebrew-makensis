@@ -1,0 +1,7 @@
+{
+  "[ruby]": {
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+		"editor.defaultFormatter": "rubocop.vscode-rubocop"
+	}
+}

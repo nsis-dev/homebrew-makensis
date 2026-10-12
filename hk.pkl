@@ -1,0 +1,28 @@
+amends "package://github.com/jdx/hk/releases/download/v1.56.1/hk@1.56.1#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.56.1/hk@1.56.1#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+    // `brew style` wraps RuboCop with Homebrew's cops and .rubocop.yml, so use
+    // it instead of Builtins.rubocop.
+    ["brew-style"] {
+        glob = List("Formula/*.rb")
+        check = "brew style {{files}}"
+        fix = "brew style --fix {{files}}"
+    }
+    ["actionlint"] = Builtins.actionlint
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps = linters
+    }
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    ["check"] {
+        steps = linters
+    }
+}
