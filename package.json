@@ -1,6 +1,5 @@
 {
   "name": "homebrew-makensis",
-  "version": "0.0.0",
   "description": "NSIS formulae for Homebrfew",
   "private": true,
   "scripts": {
