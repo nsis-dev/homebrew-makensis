@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths: [".github/workflows/ci.yml", "Formula/**.rb"]
+  pull_request:
+    paths: [".github/workflows/ci.yml", "Formula/**.rb"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    env:
+      HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+
+    steps:
+      - uses: idleberg/homebrew-tap-ci@20f0479efc2b677f1f5d13b31198caa3087fa4cc # 0.1.0
