@@ -17,7 +17,7 @@ importers:
     devDependencies:
       eslint:
         specifier: ^8.44.0
-        version: 8.44.0
+        version: 8.44.0(supports-color@7.2.0)
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
@@ -109,8 +109,8 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  brace-expansion@1.1.11:
-    resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
+  brace-expansion@1.1.21:
+    resolution: {integrity: sha512-9zeA+KLZNNzglF2TPKRQEDyx6Yby7daAkuy8MiPzpXPsYDWi/DRM8jmwUDxokQjYqBpv5DgPiwD4h4ZZSy1Ujw==}
 
   call-bind@1.0.2:
     resolution: {integrity: sha512-7O+FbCihrB5WGbFYesctwmTKae6rOiIzmz1icreWJ+0aA7LJfuqhEso2T9ncpcFtzMQtzXf2QGGueWJGTYsqrA==}
@@ -730,17 +730,17 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@eslint-community/eslint-utils@4.4.0(eslint@8.44.0)':
+  '@eslint-community/eslint-utils@4.4.0(eslint@8.44.0(supports-color@7.2.0))':
     dependencies:
-      eslint: 8.44.0
+      eslint: 8.44.0(supports-color@7.2.0)
       eslint-visitor-keys: 3.4.1
 
   '@eslint-community/regexpp@4.5.1': {}
 
-  '@eslint/eslintrc@2.1.0':
+  '@eslint/eslintrc@2.1.0(supports-color@7.2.0)':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       espree: 9.6.0
       globals: 13.20.0
       ignore: 5.2.4
@@ -753,10 +753,10 @@ snapshots:
 
   '@eslint/js@8.44.0': {}
 
-  '@humanwhocodes/config-array@0.11.10':
+  '@humanwhocodes/config-array@0.11.10(supports-color@7.2.0)':
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -811,7 +811,7 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  brace-expansion@1.1.11:
+  brace-expansion@1.1.21:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
@@ -862,9 +862,11 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  debug@4.3.4:
+  debug@4.3.4(supports-color@7.2.0):
     dependencies:
       ms: 2.1.2
+    optionalDependencies:
+      supports-color: 7.2.0
 
   deep-is@0.1.4: {}
 
@@ -941,19 +943,19 @@ snapshots:
 
   eslint-visitor-keys@3.4.1: {}
 
-  eslint@8.44.0:
+  eslint@8.44.0(supports-color@7.2.0):
     dependencies:
-      '@eslint-community/eslint-utils': 4.4.0(eslint@8.44.0)
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.44.0(supports-color@7.2.0))
       '@eslint-community/regexpp': 4.5.1
-      '@eslint/eslintrc': 2.1.0
+      '@eslint/eslintrc': 2.1.0(supports-color@7.2.0)
       '@eslint/js': 8.44.0
-      '@humanwhocodes/config-array': 0.11.10
+      '@humanwhocodes/config-array': 0.11.10(supports-color@7.2.0)
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.0
@@ -1245,7 +1247,7 @@ snapshots:
 
   minimatch@3.1.2:
     dependencies:
-      brace-expansion: 1.1.11
+      brace-expansion: 1.1.21
 
   ms@2.1.2: {}
 
