@@ -17,7 +17,7 @@ importers:
     devDependencies:
       eslint:
         specifier: ^8.44.0
-        version: 8.44.0
+        version: 8.44.0(supports-color@7.2.0)
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
@@ -256,8 +256,8 @@ packages:
     resolution: {integrity: sha512-dm9s5Pw7Jc0GvMYbshN6zchCA9RgQlzzEZX3vylR9IqFfS8XciblUXOKfW6SiuJ0e13eDYZoZV5wdrev7P3Nwg==}
     engines: {node: ^10.12.0 || >=12.0.0}
 
-  flatted@3.2.7:
-    resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
+  flatted@3.4.4:
+    resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -730,17 +730,17 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@eslint-community/eslint-utils@4.4.0(eslint@8.44.0)':
+  '@eslint-community/eslint-utils@4.4.0(eslint@8.44.0(supports-color@7.2.0))':
     dependencies:
-      eslint: 8.44.0
+      eslint: 8.44.0(supports-color@7.2.0)
       eslint-visitor-keys: 3.4.1
 
   '@eslint-community/regexpp@4.5.1': {}
 
-  '@eslint/eslintrc@2.1.0':
+  '@eslint/eslintrc@2.1.0(supports-color@7.2.0)':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       espree: 9.6.0
       globals: 13.20.0
       ignore: 5.2.4
@@ -753,10 +753,10 @@ snapshots:
 
   '@eslint/js@8.44.0': {}
 
-  '@humanwhocodes/config-array@0.11.10':
+  '@humanwhocodes/config-array@0.11.10(supports-color@7.2.0)':
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -862,9 +862,11 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  debug@4.3.4:
+  debug@4.3.4(supports-color@7.2.0):
     dependencies:
       ms: 2.1.2
+    optionalDependencies:
+      supports-color: 7.2.0
 
   deep-is@0.1.4: {}
 
@@ -941,19 +943,19 @@ snapshots:
 
   eslint-visitor-keys@3.4.1: {}
 
-  eslint@8.44.0:
+  eslint@8.44.0(supports-color@7.2.0):
     dependencies:
-      '@eslint-community/eslint-utils': 4.4.0(eslint@8.44.0)
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.44.0(supports-color@7.2.0))
       '@eslint-community/regexpp': 4.5.1
-      '@eslint/eslintrc': 2.1.0
+      '@eslint/eslintrc': 2.1.0(supports-color@7.2.0)
       '@eslint/js': 8.44.0
-      '@humanwhocodes/config-array': 0.11.10
+      '@humanwhocodes/config-array': 0.11.10(supports-color@7.2.0)
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@7.2.0)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.0
@@ -1026,10 +1028,10 @@ snapshots:
 
   flat-cache@3.0.4:
     dependencies:
-      flatted: 3.2.7
+      flatted: 3.4.4
       rimraf: 3.0.2
 
-  flatted@3.2.7: {}
+  flatted@3.4.4: {}
 
   for-each@0.3.3:
     dependencies:
